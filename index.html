@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <title>Flashcards Editor</title>
 
-<!-- Bootstrap CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
@@ -36,14 +33,17 @@
   <!-- Add Card -->
   <div class="mb-4 p-3 border rounded bg-light">
     <h4>Add New Card</h4>
+
     <div class="mb-2">
       <label class="form-label">Term</label>
       <input type="text" id="newTerm" class="form-control">
     </div>
+
     <div class="mb-2">
       <label class="form-label">Definition</label>
       <textarea id="newDefinition" class="form-control" rows="3"></textarea>
     </div>
+
     <button id="addCardBtn" class="btn btn-primary">Add Card</button>
   </div>
 
@@ -59,12 +59,21 @@
 <script>
 let data = { cards: [] };
 
+function getNextId() {
+  if (data.cards.length === 0) return 1;
+  return Math.max(...data.cards.map(c => c.id || 0)) + 1;
+}
+
 function renderCards() {
   $("#cards").empty();
 
   data.cards.forEach((card, index) => {
     const cardBox = $(`
       <div class="card-box">
+        <div class="mb-2">
+          <label class="form-label">ID</label>
+          <input type="number" class="form-control id-input" value="${card.id}">
+        </div>
         <div class="mb-2">
           <label class="form-label">Term</label>
           <input type="text" class="form-control term-input" value="${card.term}">
@@ -76,6 +85,11 @@ function renderCards() {
         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
       </div>
     `);
+
+    // Update ID
+    cardBox.find(".id-input").on("input", function () {
+      data.cards[index].id = Number($(this).val());
+    });
 
     // Update term
     cardBox.find(".term-input").on("input", function () {
@@ -107,9 +121,13 @@ $("#addCardBtn").on("click", function () {
     return;
   }
 
-  data.cards.push({ term, definition });
+  const newId = getNextId();
+
+  data.cards.push({ id: newId, term, definition });
+
   $("#newTerm").val("");
   $("#newDefinition").val("");
+
   renderCards();
 });
 
